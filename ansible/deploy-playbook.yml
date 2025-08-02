@@ -13,5 +13,7 @@
     - name: Stop and remove existing container
       shell: docker rm -f {{ service_name }} || true
 
-    - name:
+    - name: Run new container
+      shell: docker run -d --name {{ service_name }} -p 8080:80 {{ image_name }}
+
 
