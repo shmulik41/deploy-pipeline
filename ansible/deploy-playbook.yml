@@ -1,0 +1,17 @@
+---
+- name: Deploy selected service to EC2
+  hosts: web
+  become: yes
+
+  vars:
+    image_name: "shmulik41/{{ service_name }}:latest"
+
+  tasks:
+    - name: Pull Docker image
+      shell: docker pull {{ image_name }}
+
+    - name: Stop and remove existing container
+      shell: docker rm -f {{ service_name }} || true
+
+    - name:
+
