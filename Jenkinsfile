@@ -2,55 +2,33 @@ pipeline {
     agent any
 
     parameters {
-        choice(name: 'SERVICE_NAME', choices: ['service1', 'service2'], description: 'Select the service to deploy')
-    }
-
-    environment {
-        DOCKERHUB_USER = 'shmulik41'
-        IMAGE_TAG = 'latest'
+        choice(name: 'service_name', choices: ['service1', 'service2'], description: 'Select the service to deploy')
     }
 
     stages {
-        stage('📦 Show Selected Service') {
+        stage('Build Docker Image') {
             steps {
-                echo "Selected service: ${params.SERVICE_NAME}"
+                echo "🚧 בונה Docker Image עבור השירות: ${params.service_name}"
+                sh "docker build -t shmulik41/${params.service_name}:latest ./services/${params.service_name}"
             }
         }
 
-        stage('🐳 Build Docker Image') {
+        stage('Push Docker Image') {
             steps {
-                script {
-                    def imageName = "${DOCKERHUB_USER}/${params.SERVICE_NAME}:${IMAGE_TAG}"
-                    sh "docker build -t ${imageName} ./services/${params.SERVICE_NAME}"
-                }
+                echo "📤 דוחף את Docker Image ל־DockerHub"
+                sh "docker push shmulik41/${params.service_name}:latest"
             }
         }
 
-        stage('🔐 Login to DockerHub') {
+        stage('Deploy with Ansible') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh "echo \$PASSWORD | docker login -u \$USERNAME --password-stdin"
-                }
-            }
-        }
-
-        stage('🚀 Push to DockerHub') {
-            steps {
-                script {
-                    def imageName = "${DOCKERHUB_USER}/${params.SERVICE_NAME}:${IMAGE_TAG}"
-                    sh "docker push ${imageName}"
-                }
-            }
-        }
-
-        stage('🛠 Deploy with Ansible') {
-            steps {
-                sh 'ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ansible/inventory.ini ansible/deploy-playbook.yml -e "service_name=${params.SERVICE_NAME}"'
+                echo "🚀 מריץ Ansible להפצת השירות"
+                sh '''
+                #!/bin/bash
+                ansible-playbook -i ansible/inventory.ini ansible/deploy-playbook.yml -e service_name=${service_name}
+                '''
             }
         }
     }
 }
-
-
-
 
