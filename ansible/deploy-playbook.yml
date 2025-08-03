@@ -1,19 +1,25 @@
----
-- name: Deploy selected service to EC2
-  hosts: web
+- name: Deploy selected service container
+  hosts: ec2
   become: yes
 
   vars:
     image_name: "shmulik41/{{ service_name }}:latest"
+    container_name: "{{ service_name }}"
 
   tasks:
     - name: Pull Docker image
-      shell: docker pull {{ image_name }}
+      docker_image:
+        name: "{{ image_name }}"
+        source: pull
 
-    - name: Stop and remove existing container
-      shell: docker rm -f {{ service_name }} || true
+    - name: Run container
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "8080:8080"
 
-    - name: Run new container
-      shell: docker run -d --name {{ service_name }} -p 8080:80 {{ image_name }}
 
 
