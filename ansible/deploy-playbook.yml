@@ -19,7 +19,7 @@
         state: started
         restart_policy: always
         ports:
-          - "8080:8080"
+          - "{{ '8080:8080' if service_name == 'service1' else '8081:8080' }}"
 
 
 
