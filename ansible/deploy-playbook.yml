@@ -3,8 +3,8 @@
   become: yes
 
   vars:
+    image_name: "shmulik41/{{ service_name }}:latest"
     container_name: "{{ service_name }}"
-    image_name: "{{ image_name }}"
 
   tasks:
     - name: Pull Docker image
@@ -20,6 +20,8 @@
         restart_policy: always
         ports:
           - "8080:8080"
+
+
 
 
 
