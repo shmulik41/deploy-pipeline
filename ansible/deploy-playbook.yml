@@ -2,10 +2,6 @@
   hosts: ec2
   become: yes
 
-  vars:
-    image_name: "shmulik41/{{ service_name }}:latest"
-    container_name: "{{ service_name }}"
-
   tasks:
     - name: Pull Docker image
       docker_image:
@@ -14,12 +10,13 @@
 
     - name: Run container
       docker_container:
-        name: "{{ container_name }}"
+        name: "{{ service_name }}"
         image: "{{ image_name }}"
         state: started
         restart_policy: always
         ports:
           - "8080:8080"
+
 
 
 
