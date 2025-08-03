@@ -42,7 +42,14 @@ pipeline {
                 }
             }
         }
+
+        stage('🛠 Deploy with Ansible') {
+            steps {
+                sh "ansible-playbook -i ansible/inventory.ini ansible/deploy-playbook.yml -e \"service_name=${params.SERVICE_NAME}\""
+            }
+        }
     }
 }
+
 
 
